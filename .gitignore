@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+.env
+*.opp
+.collaboration/
+docs/TEAM_STATUS.md
+
+# Local agent collaboration and private design handoff. Keep out of the public repo.
+/AGENTS.md
+/CLAUDE.md
+/docs/COLLABORATION.md
+/tools/ask_peer.py
+/docs/open_prop_protocol_v0.1.md
+*:Zone.Identifier

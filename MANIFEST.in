@@ -1,0 +1,11 @@
+include README.md LICENSE pyproject.toml
+include docs/FORMAT.md docs/MMV_INTEGRATION.md
+include skills/create-opp/SKILL.md
+recursive-include opp *.py
+include tests/test_opp.py
+exclude AGENTS.md CLAUDE.md
+exclude docs/COLLABORATION.md docs/TEAM_STATUS.md
+exclude docs/open_prop_protocol_v0.1.md
+exclude tools/ask_peer.py
+prune .collaboration
+global-exclude *.pyc *:Zone.Identifier
