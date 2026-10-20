@@ -1,17 +1,44 @@
 # Open Prop Protocol (OPP)
 
-OPP packages visual and other references for inanimate props so a creative studio
-can verify their origin and choose the right reference for a shot. It is a sibling
-to [OAP](https://github.com/hodgemann/oap): ZIP bundles, SHA-256 asset hashes,
-OAP-style Ed25519 DIDs and canonical manifest signatures, and tiered clearance.
-Props of any size are supported. Instruments in Mondo Music Video are the first
+OPP is a file format and Python toolkit for packaging references to inanimate
+props. A creative studio can verify the package and choose a reference that
+shows how a prop should appear or be used in a shot. Props can range from handheld
+objects to vehicles and sets. Instruments in Mondo Music Video are the first
 integration target, not a limit on the protocol.
+
+OPP is a sibling to [OAP](https://github.com/hodgemann/oap), the actor protocol.
+It uses the same ZIP bundle approach, SHA-256 asset hashes, OAP-style Ed25519
+DIDs and manifest signatures, and tiered delivery.
 
 This is a v0.1 reference implementation. The concrete wire format is in
 [the format specification](docs/FORMAT.md). The package creation workflow is
 also documented as an [agent skill](skills/create-opp/SKILL.md).
 The [MMV integration map](docs/MMV_INTEGRATION.md) describes how its current
 instrument records can migrate; MMV does not yet consume `.opp` bundles.
+
+## What is in an `.opp` file?
+
+An `.opp` file is a ZIP archive with a `manifest.json` and the referenced files:
+
+```text
+red-guitar.opp
+├── manifest.json
+├── references/public/preview.png       # optional cleared preview
+├── references/master/base.png           # object shape, materials, and scale
+└── references/master/playing.png        # composite interaction examples
+```
+
+Every prop has at least one **base sheet**. **Interaction sheets** can show
+several ways to hold or use the prop in one image. Each sheet has a label,
+creator-defined tags, and an optional prompt modifier describing physical
+contact. The manifest lists every asset with its SHA-256 hash and clearance.
+Optional audio, 3D models, LoRAs, and embeddings can be listed with free-form
+roles. Owner, license, and provenance information can also be recorded in the
+manifest; the tool does not establish that those claims are true.
+
+The usual flow is **draft → review → package → verify → import**. A host then
+matches shot intent to an interaction sheet and falls back to a base sheet when
+none fits. OPP deliberately has no fixed vocabulary of actions.
 
 ## Create a package
 
@@ -24,10 +51,6 @@ need the `crypto` extra.
 opp draft --images ./raw-prop-images --out ./prop-source \
   --id red-guitar --name 'Red guitar' --base base.png
 
-# Optionally have a locally running Ollama vision model tag every composite.
-opp draft --images ./raw-prop-images --out ./prop-source \
-  --id red-guitar --name 'Red guitar' --base base.png --model YOUR_VISION_MODEL
-
 # Review/edit prop-source/manifest.json before packaging. Add accurate tags,
 # descriptive labels, optional prompt_modifier text and provenance/license.
 opp package --source ./prop-source --out ./red-guitar.opp --tier full
@@ -37,7 +60,8 @@ opp import --opp ./red-guitar.opp --target ./local-props/red-guitar
 
 `draft` reads top-level PNG, JPEG, and WebP images. It copies originals into
 `references/master/`, makes one base sheet and one interaction sheet per remaining
-image, and optionally calls a **local** Ollama-compatible `/api/chat` endpoint.
+image. To auto-tag composites, add `--model YOUR_VISION_MODEL` to the **draft**
+command when a local Ollama-compatible `/api/chat` endpoint is running.
 The model returns a list of tags for the whole composite and an optional prompt
 modifier. Review its output: neither tags nor visual accuracy are guaranteed.
 The draft manifest is ordinary JSON, so tags can be edited or overridden before
@@ -73,6 +97,8 @@ contains hashes for *all* source assets, so a later full delivery can be compare
 to the preview manifest. To create a preview, add at least one actual public
 preview image (for example a watermarked, reduced sheet) to the source manifest.
 The packager does not invent public clearance for high-resolution originals.
+In an editable source manifest, `sha256` can be `null`; `opp package` fills it
+for every listed file before writing the bundle.
 
 ```json
 {
