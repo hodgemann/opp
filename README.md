@@ -126,10 +126,14 @@ is built into OPP.
 
 ## Companion examples
 
-`open-props` is the planned separate example collection, analogous to OAP's
-`oap-actors`. The owner will supply and approve sample `.opp` files later. This
-reference implementation neither fetches that collection nor trusts it by
-default. No example prop assets are included here.
+[`opp-props`](https://github.com/hodgemann/opp-props) is the separate example
+collection, analogous to OAP's `oap-actors`. It holds signed `.opp` packages of
+the first two props, an electric guitar and stage keyboards, each with one
+public base sheet. Use it to try `opp verify` and `opp import`, and pin a
+release tag or hash rather than `main`. This reference implementation neither
+fetches that collection nor trusts it by default; a valid signature identifies
+the signing key but does not make that key trusted. No example prop assets are
+included in this repository.
 
 ## Status and limits
 

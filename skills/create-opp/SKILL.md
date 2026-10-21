@@ -38,4 +38,6 @@ verification, using `opp import --opp FILE --target DIR`.
 When handing a bundle to a host, explain that signature validity and signer
 trust are separate. The host should choose an interaction composite by semantic
 match to shot intent and fall back to a base sheet. Do not publish or upload the
-bundle or create the `open-props` repository without owner authorization.
+bundle without owner authorization. Owner-approved examples belong in the separate
+[`opp-props`](https://github.com/hodgemann/opp-props) collection; follow its
+README and `tools/verify_collection.py` when adding one.
