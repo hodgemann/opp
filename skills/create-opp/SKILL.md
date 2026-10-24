@@ -26,6 +26,10 @@ Record them as `public` sheets; keep originals as `master`. Add any optional
 audio, 3D, embedding, or model files to `assets` with a role and clearance.
 Every packaged file must be in the manifest. Do not copy assets from MMV or OAP
 unless the owner explicitly supplies them for this prop.
+For PNG or PCM WAV sources carrying unwanted metadata, optionally call
+`opp.clean_asset(source, output)` before listing the cleaned output. Install
+the `images` extra for PNG conversion. This helper does not cover other media
+or silently run during packaging; inspect its output before using it.
 
 Use `opp identity` when a new signing identity is needed. Keep `_private` outside
 the package and source folder; set the manifest owner's DID and public key to

@@ -1,6 +1,6 @@
-# OPP v0.1 bundle format
+# OPP v0.2 bundle format
 
-This document specifies the reference implementation's interoperable v0.1
+This document specifies the reference implementation's interoperable v0.2
 wire format. OPP is general to inanimate props; its current Mondo
 Music Video customer does not constrain prop types or interaction tags.
 
@@ -17,7 +17,7 @@ The manifest has these required top-level fields:
 
 | Field | Meaning |
 | --- | --- |
-| `opp_version` | Exact format version `0.1.0` for this implementation. |
+| `opp_version` | `0.2.0` for new drafts. v0.2 readers accept `0.1.x` and `0.2.x`. |
 | `kind` | `opp.prop.manifest`. |
 | `prop` | `id`, `name`, `owner`; optional descriptive/license fields. |
 | `sheets` | One or more sheet records, including at least one base sheet. |
@@ -64,14 +64,24 @@ separately decides whether to trust that key.
 
 The canonical JSON convention follows OAP's Python reference implementation.
 Cross-language implementations should use fixtures before assuming arbitrary
-floating-point or Unicode serialization is interoperable. OPP v0.1 manifests
+floating-point or Unicode serialization is interoperable. OPP manifests
 should use ordinary JSON strings, integers, booleans, arrays, objects, and null.
+
+## Version compatibility
+
+OPP v0.2 keeps the v0.1 manifest shape and signing bytes. The reference reader
+accepts `0.1.x` and `0.2.x`, including unknown extension fields; it rejects
+other minor versions. Packaging an existing v0.1 source manifest retains its
+declared version. A v0.1 reader may reject a v0.2 manifest, so use an older
+version only when its features and validation rules are sufficient for the
+recipient. The `clean_asset` helper is a local preparation step and does not
+change the wire format.
 
 ## Example shape
 
 ```json
 {
-  "opp_version": "0.1.0",
+  "opp_version": "0.2.0",
   "kind": "opp.prop.manifest",
   "prop": {"id": "example-prop", "name": "Example prop", "owner": {
     "name": "Example Owner", "did": null, "public_key": null}},
@@ -90,4 +100,4 @@ should use ordinary JSON strings, integers, booleans, arrays, objects, and null.
 
 `sha256` is shown as `...` for readability; actual bundles require 64 lowercase
 hexadecimal characters. The signing and verification code in `opp/core.py` is
-the v0.1 reference implementation.
+the v0.2 reference implementation.

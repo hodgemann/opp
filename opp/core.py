@@ -1,4 +1,4 @@
-"""OPP v0.1 reference packager. Signing mirrors OAP's canonical JSON convention."""
+"""OPP v0.2 reference packager. Signing mirrors OAP's canonical JSON convention."""
 from __future__ import annotations
 
 import argparse
@@ -16,7 +16,7 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 CLEARANCE = {"public": 0, "master": 1}
 TIERS = {"preview": "public", "full": "master"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
@@ -112,8 +112,13 @@ def _refs(manifest):
     return manifest["sheets"] + manifest.get("assets", [])
 
 
+def supports_version(version):
+    """Accept v0.1 and v0.2 patch releases, as OAP v0.2 does."""
+    return isinstance(version, str) and re.fullmatch(r"0\.(1|2)\.[0-9]+", version) is not None
+
+
 def _validate(manifest):
-    if not isinstance(manifest, dict) or manifest.get("opp_version") != VERSION or manifest.get("kind") != "opp.prop.manifest":
+    if not isinstance(manifest, dict) or not supports_version(manifest.get("opp_version")) or manifest.get("kind") != "opp.prop.manifest":
         raise ValueError("unsupported OPP manifest/version")
     prop = manifest.get("prop")
     if not isinstance(prop, dict) or not isinstance(prop.get("id"), str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,79}", prop["id"]):

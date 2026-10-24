@@ -1,5 +1,5 @@
 include README.md LICENSE pyproject.toml
-include docs/FORMAT.md docs/MMV_INTEGRATION.md
+include docs/FORMAT.md docs/MMV_INTEGRATION.md docs/RELEASE_NOTES_0.2.md
 include skills/create-opp/SKILL.md
 recursive-include opp *.py
 include tests/test_opp.py

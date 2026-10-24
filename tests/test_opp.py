@@ -1,11 +1,13 @@
 import json
 import subprocess
 import sys
+import wave
 import zipfile
 from pathlib import Path
 
 import pytest
 
+from opp import clean_asset, supports_version
 from opp.core import HAS_CRYPTO, draft, generate_identity, import_package, package, select_sheet, verify_package
 
 
@@ -190,3 +192,52 @@ def test_cli_draft_package_verify_import(tmp_path):
         assert result.returncode == 0, result.stderr
         assert json.loads(result.stdout)
     assert (target / "references/master/base.png").read_bytes() == b"base"
+
+
+def test_version_compatibility_and_new_drafts(tmp_path):
+    root = source(tmp_path)
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest["opp_version"] == "0.2.0"
+    assert supports_version("0.1.9") and supports_version("0.2.12")
+    assert not supports_version("0.3.0") and not supports_version("0.2")
+    manifest["opp_version"] = "0.1.0"
+    manifest_path.write_text(json.dumps(manifest))
+    bundle = tmp_path / "legacy.opp"
+    package(root, bundle)
+    assert verify_package(bundle)["ok"]
+    manifest["opp_version"] = "0.3.0"
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="unsupported"):
+        package(root, tmp_path / "future.opp")
+
+
+def test_clean_asset_preserves_pcm_and_png_pixels(tmp_path):
+    image = pytest.importorskip("PIL.Image")
+    png = tmp_path / "original.png"
+    cleaned_png = tmp_path / "cleaned.png"
+    pixels = image.new("RGBA", (2, 2), (20, 30, 40, 128))
+    # A text chunk should be stripped while transparency and pixels survive.
+    from PIL.PngImagePlugin import PngInfo
+    metadata = PngInfo()
+    metadata.add_text("Comment", "private note")
+    pixels.save(png, pnginfo=metadata)
+    assert clean_asset(str(png), str(cleaned_png)) == str(cleaned_png)
+    with image.open(cleaned_png) as result:
+        assert result.tobytes() == pixels.tobytes()
+        assert "Comment" not in result.info
+    with pytest.raises(ValueError, match="separate output"):
+        clean_asset(str(png), str(png))
+
+    wav = tmp_path / "original.wav"
+    cleaned_wav = tmp_path / "cleaned.wav"
+    frames = b"\x01\x00\x02\x00\x03\x00"
+    with wave.open(str(wav), "wb") as stream:
+        stream.setnchannels(1)
+        stream.setsampwidth(2)
+        stream.setframerate(22050)
+        stream.writeframes(frames)
+    clean_asset(str(wav), str(cleaned_wav))
+    with wave.open(str(cleaned_wav), "rb") as stream:
+        assert stream.readframes(3) == frames
+        assert stream.getparams().framerate == 22050

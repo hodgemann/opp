@@ -10,9 +10,10 @@ OPP is a sibling to [OAP](https://github.com/hodgemann/oap), the actor protocol.
 It uses the same ZIP bundle approach, SHA-256 asset hashes, OAP-style Ed25519
 DIDs and manifest signatures, and tiered delivery.
 
-This is a v0.1 reference implementation. The concrete wire format is in
+This is a v0.2 reference implementation. The concrete wire format is in
 [the format specification](docs/FORMAT.md). The package creation workflow is
 also documented as an [agent skill](skills/create-opp/SKILL.md).
+See [the v0.2 release notes](docs/RELEASE_NOTES_0.2.md) for compatibility and migration.
 The [MMV integration map](docs/MMV_INTEGRATION.md) describes how its current
 instrument records can migrate; MMV does not yet consume `.opp` bundles.
 
@@ -100,6 +101,14 @@ The packager does not invent public clearance for high-resolution originals.
 In an editable source manifest, `sha256` can be `null`; `opp package` fills it
 for every listed file before writing the bundle.
 
+If an image or audio source may contain metadata you do not want to distribute,
+use `opp.clean_asset(source, output)` before adding the cleaned file to the
+source tree. It preserves pixels in single-frame, ordinary-depth PNGs and PCM
+frames in WAVs while stripping ancillary metadata. PNG cleaning requires the
+`images` extra (`pip install -e '.[images]'`). JPEG, WebP, 3D, model, and other
+media need a creator-chosen cleaning workflow. Cleaning is explicit and never
+part of verification or automatic packaging.
+
 ```json
 {
   "file": "references/public/preview.png",
@@ -137,7 +146,7 @@ included in this repository.
 
 ## Status and limits
 
-The v0.1 packager provides plain ZIP bundles and two clearance levels. It does
+The v0.2 packager provides plain ZIP bundles and two clearance levels. It does
 not encrypt master references, generate watermarks, judge whether a VLM tag is
 correct, or decide licensing/approval for a production. Those are host or owner
 decisions. The full format is intended for studios to consume without depending

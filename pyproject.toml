@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "open-prop-protocol"
-version = "0.1.0"
+version = "0.2.0"
 description = "Portable, verifiable prop reference packages for creative studios"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -13,7 +13,8 @@ dependencies = []
 
 [project.optional-dependencies]
 crypto = ["cryptography>=41"]
-dev = ["pytest>=8", "cryptography>=41"]
+images = ["Pillow>=10"]
+dev = ["pytest>=8", "cryptography>=41", "Pillow>=10"]
 
 [project.scripts]
 opp = "opp.core:main"
